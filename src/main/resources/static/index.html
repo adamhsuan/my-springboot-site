@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!--./mvnw spring-boot:run and http://localhost:8080/-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <title>Derivative Calculator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+     <div class="container">
+        <h1>Derivative Calculator</h1>
+
+        <label for="variableInput">Enter differentiation variable:</label>
+        <textarea type="text" id="variableInput" value="x" spellcheck="false">x</textarea>
+
+        <label for="userInput">Enter expression:</label>
+        <textarea id="userInput" placeholder="e.g. 2*x^3" spellcheck="false"></textarea>
+
+        <label for="resultBox">Derivative:</label>
+        <textarea id="resultBox" readonly spellcheck="false"></textarea>
+    </div>
+    <div class="container">
+        By Adam Hsuan.
+        The derivative calculator is an application that takes derivatives... to use it... the the derivative calculator is an applcation taht 
+        textareas
+        the derivative calculator is an application that takes derivatives... to use it... the the derivative calculator is an applcation taht
+        textareas
+        the derivative calculator is an application that takes derivatives... to use it... the the derivative calculator is an applcation taht
+        textareas
+        the derivative calculator is an application that takes derivatives... to use it... the the derivative calculator is an applcation taht
+        textareas
+        the derivative calculator is an application that takes derivatives... to use it... the the derivative calculator
+    </div>
+
+    <script>
+        const inputBox = document.getElementById('userInput');
+        const variableBox = document.getElementById('variableInput');
+
+        function submitDerivative() {
+            const input = inputBox.value;
+            const variable = variableBox.value || "x";
+            fetch(`/api/process?input=${encodeURIComponent(input)}&variable=${encodeURIComponent(variable)}`)
+                .then(response => response.text())
+                .then(data => {
+                    const resultBox = document.getElementById('resultBox');
+                    resultBox.value = data;
+                    autoGrow(resultBox); // <-- ensures output box grows
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+
+        // Add Enter key listener to both inputs
+        [inputBox, variableBox].forEach(box => {
+            box.addEventListener('keypress', event => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    submitDerivative();
+                }
+            });
+        });
+        function autoGrow(element) {
+        element.style.height = "auto";                  // reset height
+        element.style.height = element.scrollHeight + "px"; // grow to fit content
+        }
+
+        // Apply auto-grow to your textareas
+        document.querySelectorAll('textarea').forEach(el => {
+            el.addEventListener('input', () => autoGrow(el));
+        });
+
+        // Initialize heights on page load
+        document.querySelectorAll('textarea').forEach(el => autoGrow(el));
+
+
+    </script>
+</body>
+</html>
