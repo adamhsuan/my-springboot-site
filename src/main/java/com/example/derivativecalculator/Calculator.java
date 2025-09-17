@@ -83,7 +83,7 @@ public class Calculator
     }
     */
     public DerivativeResponse getDerivative(String input, String variable, String order, String point) {
-        if (input=="adam is slick")
+        if (input=="only The Universe knows this")
         {
             return new DerivativeResponse("https://adamhsuan.github.io/happy-birthday/",null,null);
         }
