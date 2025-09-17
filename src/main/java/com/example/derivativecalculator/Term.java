@@ -136,11 +136,11 @@ public class Term extends Expression {
             if (factor instanceof Num)
             {
                 Num number = (Num) factor;
-                ArrayList<Integer> numberFactors = new ArrayList<Integer>();
-                int numValue = number.getValue();
-                for (int j=2;j<numValue; j++)
+                ArrayList<Double> numberFactors = new ArrayList<Double>();
+                double numValue = number.getValue();
+                for (double j=2;j<numValue; j++)
                 {
-                    if ((double)(numValue/j) == ((double)numValue)/j)
+                    if ((double)(numValue/j) == ((double)numValue)/j && (double)(numValue/j) == Math.floor((double)numValue/j))
                     {
                         numValue /= j;
                         numberFactors.add(j);
@@ -149,7 +149,7 @@ public class Term extends Expression {
                 }
                 numberFactors.add(numValue);
             
-                for(int numberFactor : numberFactors)
+                for(double numberFactor : numberFactors)
                 {
                     if (number.getExponent() == null)
                         addFactor(new Num(numberFactor));
@@ -231,8 +231,8 @@ public class Term extends Expression {
             }
         }
         
-        int numeratorProduct = 1;
-        int denominatorProduct = 1;
+        double numeratorProduct = 1;
+        double denominatorProduct = 1;
         for (int i=0; i<factors.size(); i++)
         {
             Expression factorExpression = new Expression();
@@ -250,7 +250,7 @@ public class Term extends Expression {
                     Term exponentTerm = (Term) factors.get(i).getExponent().getTerms().get(0);
                     if (exponentTerm.getFactors().size()==1 && exponentTerm.getFactors().get(0) instanceof Num && exponentTerm.getFactors().get(0).getExponent() == null)
                     {
-                        int exponentValue = ((Num)exponentTerm.getFactors().get(0)).getValue();
+                        double exponentValue = ((Num)exponentTerm.getFactors().get(0)).getValue();
                         if (exponentValue>=0)
                             numeratorProduct*=Math.pow((((Num)factors.get(i)).getValue()),exponentValue);
                         else

@@ -1,6 +1,8 @@
 package com.example.derivativecalculator;
 
 import java.util.*;
+import java.lang.Math;
+
 public class Expression {
 
     private ArrayList<Expression> terms = new ArrayList<Expression>();
@@ -330,8 +332,8 @@ public class Expression {
         //there shouldnt be any absolute values, those should have been cleared in simplify term
         setTerms(removeEmptyExpressions(getTerms()));
         removeExtraOnesAndZeroes();
-        int numerator=0;
-        int denominator=1;
+        double numerator=0;
+        double denominator=1;
         Expression negativeOne = createExpressionWithFactor(new Num(-1));
         for (int i=0; i<terms.size(); i++)
         {
@@ -339,8 +341,8 @@ public class Expression {
             {
                 ((Term)terms.get(i)).addFactor(new Num(1));
             }
-            int termNumerator = 0;
-            int termDenominator = 1;
+            double termNumerator = 0;
+            double termDenominator = 1;
             boolean containsRational=false;
             for (Expression factor : ((Term)terms.get(i)).getFactors())
             {
@@ -781,4 +783,317 @@ public class Expression {
         return newExpression;
     }
 
+
+public Expression evaluateAtPoint(String variable, Expression point)
+{
+    Expression expression = createDeepCopy(this);
+    if (expression.getExponent()!=null)
+    {
+        Expression newExponent = expression.getExponent().evaluateAtPoint(variable,point);
+        expression.setExponent(newExponent);
+    }
+    if (expression.isInstanceOfExpression())
+    {
+        Expression newExpression = new Expression();
+        for (Expression term : expression.getTerms())
+        {
+            newExpression.addTerm(term.evaluateAtPoint(variable,point));
+        }
+        newExpression.simplifyExpression();
+        return newExpression;
+    }
+    else if (expression instanceof Term)
+    {
+        Term newTerm = new Term();
+        for (Expression factor : ((Term)expression).getFactors())
+        {
+            newTerm.addFactor(factor.evaluateAtPoint(variable,point));
+        }
+        newTerm.simplifyTerm();
+        return newTerm;
+    }
+    else if (expression instanceof Variable)
+    {     
+        if (((Variable)expression).getSymbol().equals(variable))
+            if (expression.getExponent()!=null)
+                {
+                    Expression newExpression = createExpressionWithFactor(point);
+                    newExpression.setExponent(expression.getExponent());
+                    return newExpression;
+                }
+            else
+                return point;
+        else
+            return createDeepCopy(expression);
+    }
+    else if (expression instanceof Num)
+    {
+        return createDeepCopy(expression);
+    }
+    else if (expression.isInstanceOfFunction())
+    {
+        Function newFunction = new Function();
+        newFunction.setType(((Function)expression).getType());
+        newFunction.setArgument(((Function)expression).getArgument().evaluateAtPoint(variable,point));
+        if (((Function)expression).getExponent()!=null)
+            newFunction.setExponent(((Function)expression).getExponent().evaluateAtPoint(variable,point));
+        return newFunction;
+    }
+    else return createDeepCopy(expression);
+}
+//simplifes, turning fractions into decimals and plugging in values for functions, exponents, etc.
+public double evaluateAtPointNumerical(String variable, Double point)
+{
+    if (this.isInstanceOfExpression())
+    {
+        double sum = 0;
+        for (Expression term : this.getTerms())
+        {
+            sum += term.evaluateAtPointNumerical(variable,point);
+        }
+        return sum;
+    }
+    else if (this instanceof Term)
+    {
+        double product = 1;
+        for (Expression factor : ((Term)this).getFactors())
+        {
+            product *= factor.evaluateAtPointNumerical(variable,point);
+        }
+        return product;
+    }
+    else if (this instanceof Variable)
+    {
+        if (((Variable)this).getSymbol().equals(variable))
+        {
+            if (point != null)
+                if (this.getExponent()!=null)
+                    return Math.pow(point,this.getExponent().evaluateAtPointNumerical(variable,point));
+                else
+                    return point;
+            else
+                throw new IllegalArgumentException("Point must be a numeric value.");
+        }
+        else
+            throw new IllegalArgumentException("Cannot evaluate expression with undefined variable " + ((Variable)this).getSymbol());
+    }
+    else if (this instanceof Num)
+    {
+        if (this.getExponent()!=null)
+        {
+            return Math.pow(((Num)this).getValue(),this.getExponent().evaluateAtPointNumerical(variable,point));
+        }
+        else
+            return ((Num)this).getValue();
+    }
+    else if (this.isInstanceOfFunction())
+    {
+        double argumentValue = ((Function)this).getArgument().evaluateAtPointNumerical(variable,point);
+        double baseValue = 0;
+        String type = ((Function)this).getType();
+        if (type.equals("sin"))
+            baseValue = (double)Math.sin(argumentValue);
+        else if (type.equals("cos"))
+            baseValue = (double)Math.cos(argumentValue);
+        else if (type.equals("tan"))
+            baseValue = (double)Math.tan(argumentValue);
+        else if (type.equals("cot"))
+            baseValue = (double)(1/Math.tan(argumentValue));
+        else if (type.equals("sec"))
+            baseValue = (double)(1/Math.cos(argumentValue));
+        else if (type.equals("csc"))
+            baseValue = (double)(1/Math.sin(argumentValue));
+        else if (type.equals("arcsin"))
+            baseValue = (double)Math.asin(argumentValue);
+        else if (type.equals("arccos"))
+            baseValue = (double)Math.acos(argumentValue);
+        else if (type.equals("arctan"))
+            baseValue = (double)Math.atan(argumentValue);
+        else if (type.equals("arccot"))
+            baseValue = (double)(Math.PI/2 - Math.atan(argumentValue));
+        else if (type.equals("arcsec"))
+            baseValue = (double)Math.acos(1/argumentValue);
+        else if (type.equals("arccsc"))
+            baseValue = (double)Math.asin(1/argumentValue);
+        else if (type.equals("ln"))
+            baseValue = (double)Math.log(argumentValue);
+        else if (type.equals("sqrt"))
+            baseValue = (double)Math.sqrt(argumentValue);
+        if (this.getExponent()!=null)
+        {
+            double exponentValue = this.getExponent().evaluateAtPointNumerical(variable,point);
+            return (double)Math.pow(baseValue,exponentValue);
+        }
+        else
+            return baseValue;
+}
+    else
+        throw new IllegalArgumentException("Cannot evaluate expression with undefined variable.");
+}
+public String convertExpressionToString()
+    {
+        Expression expression = createDeepCopy(this);
+        Expression oneHalf = Expression.createExpressionWithFactor(new Num(2));
+        oneHalf.getFirstFactor().setExponent(Expression.createExpressionWithFactor(new Num(-1)));
+        Expression negativeOneHalf = Expression.createDeepCopy(oneHalf);
+        negativeOneHalf.addFactor(new Num(-1));
+        if (expression.getExponent() != null)
+        {
+            if (expression.getExponent().equals(oneHalf) || expression.getExponent().equals(negativeOneHalf))
+            {
+                Function sqrtExpression = new Function();
+                sqrtExpression.setType("sqrt");
+                if (expression.getExponent().equals(negativeOneHalf))
+                    sqrtExpression.setExponent(Expression.createExpressionWithFactor(new Num(-1)));
+                Expression argument = Expression.createDeepCopy(expression);
+                argument.setExponent(null);
+                argument = Expression.createExpressionWithFactor(argument);
+                sqrtExpression.setArgument(argument);
+                expression = sqrtExpression;
+            }
+            
+        }
+        String string = "";     
+        if (expression.isInstanceOfExpression())
+        {
+            if (expression.getIsAbsoluteValue())
+                string+="|";
+            else
+                string+="(";
+            for (Expression term : expression.getTerms())
+            {
+                String newString=term.convertExpressionToString();
+                if (newString.length()>0&&newString.charAt(0)=='-'&&!(string.equals("(")))
+                    string=string.substring(0,string.length()-1);
+                string+=newString;
+                if (string.length()>0)
+                {
+                    if (string.charAt(string.length()-1)=='*')
+                    {
+                        string=string.substring(0,string.length()-1);
+                    }
+                }
+                string+="+";
+            }
+            if (expression.getTerms().size()>0)
+            {
+                string=string.substring(0,string.length()-1);
+            }
+            if (expression.getIsAbsoluteValue())
+                string+="|";
+            else
+                string+=")";
+            if (expression.getOuterExpression()==null)
+                string=string.substring(1,string.length()-1);
+        }
+        else if (expression instanceof Term)
+        {
+            Term denominatorTerm = new Term();
+            for (Expression factor : ((Term)expression).getFactors())
+            {
+                boolean inDenominator=false;
+                if (factor.getExponent()!=null&&factor.getExponent().getTerms().size()==1)
+                {
+                    for (Expression exponentFactor: ((Term)factor.getExponent().getTerms().get(0)).getFactors())
+                    {
+                        if (exponentFactor instanceof Num && ((Num)exponentFactor).getValue()<0)
+                        {
+                            Expression newFactor = Expression.createDeepCopy(factor);
+                            Term newExponentTerm = (Term) Expression.createDeepCopy(factor.getExponent().getTerms().get(0));
+                            newExponentTerm.addFactor(new Num(-1));
+                            Expression newExponentExpression = new Expression();
+                            newExponentExpression.addTerm(newExponentTerm);
+                            newExponentExpression.simplifyExpression();
+                            newFactor.setExponent(newExponentExpression);
+                            denominatorTerm.addFactor(newFactor);
+                            inDenominator=true;
+                            break;
+                        }
+                    }
+                }
+                if (inDenominator==false)
+                {
+                    if (string.equals("-1"))
+                    {
+                        string="-";
+                    }
+                    if (string.length()>0)
+                    {
+                        if (Character.isDigit(string.charAt(string.length()-1)) && factor instanceof Num)
+                        {
+                            string+="*";
+                        }
+                    }
+                    if (factor instanceof Num && ((Num)factor).getValue()<0 && !string.equals(""))
+                        string+="*";
+                    if (!(factor instanceof Num && ((Num)factor).getValue()==1 && string.equals("") && ((Term)expression).getFactors().size()>1))
+                        string+=factor.convertExpressionToString();
+                        
+                }
+            }
+            denominatorTerm.simplifyTerm();
+            if (denominatorTerm.getFactors().size()>0&&!(denominatorTerm.getFactors().size()==1&&denominatorTerm.getFactors().get(0) instanceof Num&&((Num)denominatorTerm.getFactors().get(0)).getValue()==1&&denominatorTerm.getFactors().get(0).getExponent()==null))
+            {
+                if (string.length()>0)
+                {
+                    if (string.charAt(string.length()-1)=='*')
+                        string=string.substring(0,string.length()-1);
+                }
+                else
+                    string+="1";
+                string+="/";
+                if (denominatorTerm.getFactors().size()>1)
+                {
+                    string+="(";
+                    string+=denominatorTerm.convertExpressionToString();
+                    string+=")";
+                }
+                else
+                {
+                    string+=denominatorTerm.convertExpressionToString();
+                }   
+            }
+            if (string.length()>0&&string.charAt(string.length()-1)=='*')
+                string=string.substring(0,string.length()-1);
+        }
+        else if (expression instanceof Num)
+        {
+            double value = ((Num)expression).getValue();
+            if (value<Integer.MAX_VALUE && value>Integer.MIN_VALUE && value==(int)value)
+                string+=(String)(Integer.toString((int)value));
+            else
+                string+=value;
+        }
+        else if (expression instanceof Variable)
+        {
+            string+=((Variable)expression).getSymbol();
+        }
+        else if (expression instanceof Function)
+        {
+            if (expression.getExponent()!=null)
+                string+="(";
+            string+=((Function)expression).getType();
+            string+="(";
+            String argument = ((Function)expression).getArgument().convertExpressionToString();
+            if (argument.length()>0 && argument.charAt(0)=='(')
+                argument = argument.substring(1,argument.length()-1);
+            string+=argument;
+            string+=")";
+            if (expression.getExponent()!=null)
+                string+=")";
+        }
+        int index=string.length();
+        if (expression.getExponent()!=null)
+        {
+            string+="^"+expression.getExponent().convertExpressionToString();
+            if (string.length()>index+2 && string.charAt(index+1)=='('&&expression.getExponent().getTerms().size()==1 && ((Term)expression.getExponent().getTerms().get(0)).getFactors().size()==1 && ((Term)expression.getExponent().getTerms().get(0)).getFactors().get(0).getExponent()==null)
+            {
+                string=string.substring(0,index+1)+string.substring(index+2,string.length()-1);
+                if (((Term)expression.getExponent().getTerms().get(0)).getFactors().get(0) instanceof Num && ((Num)((Term)expression.getExponent().getTerms().get(0)).getFactors().get(0)).getValue()==1)
+                    string=string.substring(0,string.length()-2);
+            }
+            string+="*";
+        }
+        return string;
+    }
 }

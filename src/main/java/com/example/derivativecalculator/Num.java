@@ -1,27 +1,26 @@
 package com.example.derivativecalculator;
-
 public class Num extends Expression {
     
-    private int value;
+    private double value;
     public Num()
     {
     }
-    public Num(int value)
+    public Num(double value)
     {
         this.value = value;
     }
-    public Num(Expression exponent, int value)
+    public Num(Expression exponent, double value)
     {
         super(exponent);
         this.value = value;
     }
     
-    public int getValue()
+    public double getValue()
     {
         return value;
     }
     
-    public void setValue(int value)
+    public void setValue(double value)
     {
         this.value = value;
     }

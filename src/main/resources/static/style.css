@@ -24,7 +24,7 @@ body {
     padding: 28px 36px;
     border-radius: 16px;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
-    width: 420px;
+    width: 800px; /* wider than before */
     margin: 20px auto;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -53,28 +53,51 @@ body {
     color: #34495e;
 }
 
-/* Inputs */
-.container input[type="text"],
-.container input[type="number"],
-.container input[readonly] {
-    font-family: 'Cambria Math', 'STIX Two Math', 'Latin Modern Math', 'Times New Roman', serif;
+/* Textareas general */
+textarea {
+    font-family: 'XITS Math', 'TeX Gyre Termes Math', 'STIX Two Math', 
+                 'Latin Modern Math', 'Cambria Math', serif;
     font-size: 16px;
-    display: block;
     width: 100%;
-    padding: 12px 14px;
-    border-radius: 8px;
-    border: 1.5px solid #dcdfe6;
-    margin-bottom: 18px;
-    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    min-height: 40px;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    resize: none;
+    overflow: hidden; /* hides scrollbars */
 }
 
-.container input:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+/* Growable textareas (derivative, values, etc.) */
+.growbox {
+    min-height: 40px;
 }
 
-/* Read-only box style */
+/* Large expression box on top */
+.large-input {
+    min-height: 80px;
+    font-size: 17px;
+    font-weight: 500;
+}
+
+/* Horizontal row of smaller inputs (variable, order, evaluate at) */
+.row-inputs {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 16px 0;
+}
+
+.row-inputs > div {
+    flex: 1;
+}
+
+.row-inputs textarea {
+    min-height: 40px;
+    font-size: 15px;
+}
+
+/* Result box style */
 #resultBox {
     background: #f9fafc;
     font-weight: 500;
@@ -82,27 +105,13 @@ body {
     cursor: default;
 }
 
-/* Secondary info box */
-.container:last-of-type {
+/* Description container at bottom */
+.container.description {
     text-align: center;
     font-size: 0.95rem;
     font-style: italic;
     color: #555;
     background: #fdfdfd;
     box-shadow: inset 0 0 6px rgba(0,0,0,0.05);
+    width: 800px; /* match calculator width */
 }
-textarea {
-    font-family: 'XITS Math', 'TeX Gyre Termes Math', 'STIX Two Math', 'Latin Modern Math', 'Cambria Math', serif;
-    /*font-family: 'Cambria Math', 'STIX Two Math', 'Latin Modern Math', 'Times New Roman', serif;*/
-    font-size: 16px;
-    width: 100%;          /* full width */
-    min-height: 40px;     /* small starting height */
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
-    resize: none;         /* prevents manual resizing */
-    overflow: hidden;     /* hides scrollbars */
-}
-
-

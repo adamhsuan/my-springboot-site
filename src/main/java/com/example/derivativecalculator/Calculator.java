@@ -52,14 +52,86 @@ public class Calculator
         System.out.println(convertExpressionToString(expression));
     }
         */
-    public String getDerivative(String input, String variable) {
+    /* 
+    public String getDerivative(String input, String variable, String order) {
         try {
-            Expression expression = convertStringToExpression(input);
-            expression.simplifyExpression();
-            String derivativeString =convertExpressionToString(expression.takeDerivative(variable));
-            return derivativeString;
+            for (char c : order.toCharArray()) {
+                if (!Character.isDigit(c)) {
+                    throw new IllegalArgumentException("Order must be a positive integer.");
+                }
+            }
+            int n = Integer.parseInt(order);
+            if (n < 1) {
+                throw new IllegalArgumentException("Order must be a positive integer.");
+            }
+            else if (n > 10) {
+                throw new IllegalArgumentException("Order too high. Please enter an order less than or equal to 10.");
+            }
+            else {
+                Expression expression = convertStringToExpression(input);
+                expression.simplifyExpression();
+                for (int i = 0; i < n; i++) {
+                    expression = expression.takeDerivative(variable);
+                    expression.simplifyExpression();
+                }
+                String derivativeString = convertExpressionToString(expression);
+                return derivativeString;
+            }
         } catch (Exception e) {
             return "Error: " + e.getMessage();
+        }
+    }
+    */
+    public DerivativeResponse getDerivative(String input, String variable, String order, String point) {
+        if (input=="adam is slick")
+        {
+            return new DerivativeResponse("https://adamhsuan.github.io/happy-birthday/",null,null);
+        }
+        try {
+            // validate order
+            for (char c : order.toCharArray()) {
+                if (!Character.isDigit(c)) {
+                    throw new IllegalArgumentException("Order must be a positive integer.");
+                }
+            }
+            int n = Integer.parseInt(order);
+            if (n < 1) {
+                throw new IllegalArgumentException("Order must be a positive integer.");
+            } else if (n > 10) {
+                throw new IllegalArgumentException("Order too high. Please enter an order less than or equal to 10.");
+            }
+
+            // build expression
+            Expression expression = convertStringToExpression(input);
+            expression.simplifyExpression();
+
+            // differentiate n times
+            for (int i = 0; i < n; i++) {
+                expression = expression.takeDerivative(variable);
+                expression.simplifyExpression();
+            }
+
+            // convert derivative back to string
+            String derivativeString = expression.convertExpressionToString();
+
+            // optional evaluation
+            String valueString = null;
+            String numericalValueString = null;
+            if (point != null && !point.trim().isEmpty()) 
+            {
+                Expression pointExpr = convertStringToExpression(point.trim());
+                Expression valueExpr = expression.evaluateAtPoint(variable, pointExpr); 
+                valueString = valueExpr.convertExpressionToString();
+                double pointFloat = pointExpr.evaluateAtPointNumerical(null, null);
+                if (pointFloat>Integer.MIN_VALUE && pointFloat<Integer.MAX_VALUE && pointFloat==(int)pointFloat)
+                    numericalValueString = (int)expression.evaluateAtPointNumerical(variable, pointFloat)+"";
+                else 
+                    numericalValueString = expression.evaluateAtPointNumerical(variable, pointFloat)+"";
+            }
+            return new DerivativeResponse(derivativeString, valueString,numericalValueString);
+
+        } catch (Exception e) {
+            return new DerivativeResponse("Error: " + e.getMessage(), null,null);
         }
     }
 
@@ -70,7 +142,7 @@ public class Calculator
         Expression expression = new Expression();
         expression.addFactor(currentExpression);
         boolean isNum = false;
-        int currentNum = 0;
+        float currentNum = 0;
         int decimalDigits = -1;
         boolean openAbsoluteValue = true;
         for (int i=0; i<string.length(); i++)
@@ -90,7 +162,7 @@ public class Calculator
                     number = new Expression(currentExpression.getExponent());
                     Term numberTerm = new Term();
                     numberTerm.addFactor(new Num(currentNum));
-                    numberTerm.addFactor(new Num(Expression.createExpressionWithFactor(new Num(-1)),(int)Math.pow(10,decimalDigits)));
+                    numberTerm.addFactor(new Num(Expression.createExpressionWithFactor(new Num(-1)),(float)Math.pow(10,decimalDigits)));
                     number.addTerm(numberTerm);
                 }
                 Term outerTerm = (Term) currentExpression.getOuterExpression();
@@ -261,7 +333,7 @@ public class Calculator
         }
         return expression;
     }
-    public static String convertExpressionToString(Expression expression)
+public static String convertExpressionToString(Expression expression)
     {
         Expression oneHalf = Expression.createExpressionWithFactor(new Num(2));
         oneHalf.getFirstFactor().setExponent(Expression.createExpressionWithFactor(new Num(-1)));

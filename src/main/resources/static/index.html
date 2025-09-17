@@ -1,50 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!--./mvnw spring-boot:run and http://localhost:8080/-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
     <title>Derivative Calculator</title>
     <link rel="stylesheet" href="style.css">
+    <!--./mvnw spring-boot:run and http://localhost:8080/-->
 </head>
 
 <body>
-     <div class="container">
-        <h1>Derivative Calculator</h1>
-
-        <label for="variableInput">Enter differentiation variable:</label>
-        <textarea type="text" id="variableInput" value="x" spellcheck="false">x</textarea>
-
-        <label for="userInput">Enter expression:</label>
-        <textarea id="userInput" placeholder="e.g. 2*x^3" spellcheck="false"></textarea>
-
-        <label for="resultBox">Derivative:</label>
-        <textarea id="resultBox" readonly spellcheck="false"></textarea>
-    </div>
     <div class="container">
+    <h1>Derivative Calculator</h1>
+        <!-- Expression input large on top -->
+        <label for="userInput">Enter expression:</label>
+        <textarea class="growbox large-input" id="userInput" placeholder="e.g. 2*x^3" spellcheck="false"></textarea>
+
+        <!-- Row of small inputs -->
+        <div class="row-inputs">
+            <div>
+                <label for="variableInput">Variable:</label>
+                <textarea id="variableInput" spellcheck="false">x</textarea>
+            </div>
+            <div>
+                <label for="orderInput">Order (n):</label>
+                <textarea id="orderInput" spellcheck="false">1</textarea>
+            </div>
+            <div>
+                <label for="pointInput">Evaluate at:</label>
+                <textarea id="pointInput" placeholder="e.g. 2" spellcheck="false"></textarea>
+            </div>
+        </div>
+
+        <!-- Results stacked -->
+        <label for="resultBox">Derivative:</label>
+        <textarea class="growbox" id="resultBox" readonly spellcheck="false"></textarea>
+
+        <label for="valueBox">Exact Value at point:</label>
+        <textarea class="growbox" id="valueBox" readonly spellcheck="false"></textarea>
+
+        <label for="numericalValueBox">Numerical Value at point:</label>
+        <textarea class="growbox" id="numericalValueBox" readonly spellcheck="false"></textarea>
+    </div>
+
+    <div class="container description">
         Description
     </div>
+
 
     <script>
         const inputBox = document.getElementById('userInput');
         const variableBox = document.getElementById('variableInput');
+        const orderBox = document.getElementById('orderInput');
+        const pointBox = document.getElementById('pointInput');
+        const resultBox = document.getElementById('resultBox');
+        const valueBox = document.getElementById('valueBox');
+        const numericalValueBox = document.getElementById('numericalValueBox');
 
         function submitDerivative() {
             const input = inputBox.value;
             const variable = variableBox.value || "x";
-            fetch(`/api/process?input=${encodeURIComponent(input)}&variable=${encodeURIComponent(variable)}`)
-                .then(response => response.text())
+            const order = orderBox.value || "1";
+            const point = pointBox.value; // optional
+
+            fetch(`/api/process?input=${encodeURIComponent(input)}&variable=${encodeURIComponent(variable)}&order=${encodeURIComponent(order)}&point=${encodeURIComponent(point)}`)
+                .then(response => response.json()) // backend should return JSON now
                 .then(data => {
-                    const resultBox = document.getElementById('resultBox');
-                    resultBox.value = data;
-                    autoGrow(resultBox); // <-- ensures output box grows
+                    resultBox.value = data.derivative || "";
+                    autoGrow(resultBox);
+
+                    if (data.valueAtPoint !== undefined && data.valueAtPoint !== null) {
+                        valueBox.value = data.valueAtPoint;
+                        autoGrow(valueBox);
+                    } else {
+                        valueBox.value = ""; // clear if no point provided
+                    }
+                    if (data.numericalValueAtPoint !== undefined && data.numericalValueAtPoint !== null) {
+                        numericalValueBox.value = data.numericalValueAtPoint;
+                        autoGrow(numericalValueBox);
+                    } else {
+                        numericalValueBox.value = ""; // clear if no point provided
+                    }
                 })
                 .catch(error => console.error('Error:', error));
         }
 
-
-        // Add Enter key listener to both inputs
-        [inputBox, variableBox].forEach(box => {
+        // Add Enter key listener to all boxes
+        [inputBox, variableBox, orderBox, pointBox].forEach(box => {
             box.addEventListener('keypress', event => {
                 if (event.key === 'Enter') {
                     event.preventDefault();
@@ -52,20 +93,17 @@
                 }
             });
         });
+
         function autoGrow(element) {
-        element.style.height = "auto";                  // reset height
-        element.style.height = element.scrollHeight + "px"; // grow to fit content
+            element.style.height = "auto";
+            element.style.height = element.scrollHeight + "px";
         }
 
-        // Apply auto-grow to your textareas
+        // Apply auto-grow to textareas
         document.querySelectorAll('textarea').forEach(el => {
             el.addEventListener('input', () => autoGrow(el));
+            autoGrow(el); // initialize
         });
-
-        // Initialize heights on page load
-        document.querySelectorAll('textarea').forEach(el => autoGrow(el));
-
-
     </script>
 </body>
 </html>
