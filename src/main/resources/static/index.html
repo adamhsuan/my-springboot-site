@@ -43,7 +43,13 @@
     </div>
 
     <div class="container description">
-        Guess the phrase... it has the letters knTiohywoslrtnUeiesvhnes :)
+        This is a symbolic derivative calculator, a calculator that takes algebraic expressions and returns their derivatives. 
+
+        How to use it: Enter an expression, such as 3sinx+e^y, a variable to differentiate with respect to (other variables are treated as constants), and an order. Order is the number of times you take the derivative. You may oprionally enter a numerical value to evaluate the result of the derivative at.
+
+        How to enter a valid expression: The symbols and functions acceptable to the program are digits,*,/,+,-,^,(,),|,sqrt,ln,sin,cos,tan,cot,sec,csc,arcsin,arccos,arctan,arccot,arcsec,arccsc. Fuctions and exponents may or may not have parenthesis, however if you don't include parenthesis only the next factor will be made an argument. For example, sinx and sin(x) are both allowable, however sinxy is the same as sin(x)*y and not sin(xy). Generally. the rules you would follow when entering a function into a graphing calculator apply to this calculator (for example, 1/xy = y/x not 1/(xy)).   
+        
+        How it works: The program makes use of a tree data structure containing nodes corresponding to expressions, terms, factors, and exponents, and the majority of the program's complexity has to do with simplifying that tree.
     </div>
 
 
