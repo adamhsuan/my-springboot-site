@@ -1042,7 +1042,9 @@ public String convertExpressionToString()
                 else
                     string+="1";
                 string+="/";
-                if (denominatorTerm.getFactors().size()>1 || denominatorTerm.getFactors().get(0).isInstanceOfExpression())
+                String denominator = denominatorTerm.convertExpressionToString();
+                //if (denominatorTerm.getFactors().size()>1 || denominatorTerm.getFactors().get(0).isInstanceOfExpression())
+                if (denominator.length()>1)
                 {
                     string+="(";
                     string+=denominatorTerm.convertExpressionToString();
@@ -1085,13 +1087,19 @@ public String convertExpressionToString()
         int index=string.length();
         if (expression.getExponent()!=null)
         {
-            string+="^"+expression.getExponent().convertExpressionToString();
+            String exponent = expression.getExponent().convertExpressionToString();
+            if (exponent.length()>1)
+                string+="^("+exponent+")";
+            else
+                string+="^"+exponent;
+            /*
             if (string.length()>index+2 && string.charAt(index+1)=='('&&expression.getExponent().getTerms().size()==1 && ((Term)expression.getExponent().getTerms().get(0)).getFactors().size()==1 && ((Term)expression.getExponent().getTerms().get(0)).getFactors().get(0).getExponent()==null)
             {
                 string=string.substring(0,index+1)+string.substring(index+2,string.length()-1);
                 if (((Term)expression.getExponent().getTerms().get(0)).getFactors().get(0) instanceof Num && ((Num)((Term)expression.getExponent().getTerms().get(0)).getFactors().get(0)).getValue()==1)
                     string=string.substring(0,string.length()-2);
             }
+            */
             string+="*";
         }
         return string;
