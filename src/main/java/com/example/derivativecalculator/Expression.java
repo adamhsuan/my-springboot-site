@@ -1042,7 +1042,7 @@ public String convertExpressionToString()
                 else
                     string+="1";
                 string+="/";
-                if (denominatorTerm.getFactors().size()>1)
+                if (denominatorTerm.getFactors().size()>1 || denominatorTerm.getFactors().get(0).isInstanceOfExpression())
                 {
                     string+="(";
                     string+=denominatorTerm.convertExpressionToString();
