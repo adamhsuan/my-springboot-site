@@ -35,11 +35,8 @@
         <label for="resultBox">Derivative:</label>
         <textarea class="growbox" id="resultBox" readonly spellcheck="false"></textarea>
 
-        <label for="valueBox">Exact Value at point:</label>
+        <label for="valueBox">Value at point:</label>
         <textarea class="growbox" id="valueBox" readonly spellcheck="false"></textarea>
-
-        <label for="numericalValueBox">Numerical Value at point:</label>
-        <textarea class="growbox" id="numericalValueBox" readonly spellcheck="false"></textarea>
     </div>
 
     <div class="container description">
@@ -60,7 +57,6 @@
         const pointBox = document.getElementById('pointInput');
         const resultBox = document.getElementById('resultBox');
         const valueBox = document.getElementById('valueBox');
-        const numericalValueBox = document.getElementById('numericalValueBox');
 
         function submitDerivative() {
             const input = inputBox.value;
@@ -79,12 +75,6 @@
                         autoGrow(valueBox);
                     } else {
                         valueBox.value = ""; // clear if no point provided
-                    }
-                    if (data.numericalValueAtPoint !== undefined && data.numericalValueAtPoint !== null) {
-                        numericalValueBox.value = data.numericalValueAtPoint;
-                        autoGrow(numericalValueBox);
-                    } else {
-                        numericalValueBox.value = ""; // clear if no point provided
                     }
                 })
                 .catch(error => console.error('Error:', error));
