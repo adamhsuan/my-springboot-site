@@ -13,7 +13,7 @@ body {
     justify-content: center;  /* vertically center */
     align-items: center;      /* horizontally center */
     min-height: 100vh;
-    background: linear-gradient(135deg, #e0eafc, #cfdef3);
+    background: #b396ae;
     color: #333;
     padding: 20px;
 }
